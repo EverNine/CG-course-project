@@ -211,6 +211,7 @@ function initGui(){
   aLight.addColor(ambientLight, 'color');
   dLight = gui.addFolder('Directional Light');
   dLight.add(directionalLight, 'visible');
+  dLight.add(directionalLight, 'intensity', 0, 10);
   dLight.add(directionalLight.position, "x", -100, 100);
   dLight.add(directionalLight.position, "y", -100, 100);
   dLight.add(directionalLight.position, "z", -100, 100);
