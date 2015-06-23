@@ -11,8 +11,10 @@ var mouseState = false;
 var moveStep = 0.1;
 var rotateStep = 0.005;
 var mousePosition;
+
+var texture = THREE.ImageUtils.loadTexture( "textures/eye.jpg" );
 var geometry = new THREE.SphereGeometry( 1, 32, 32 );
-var material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
+var material = new THREE.MeshPhongMaterial( { color: 0x00ff00, map: texture } );
 var cube = new THREE.Mesh( geometry, material );
 scene.add( cube );
 var light = new THREE.AmbientLight( 0x404040 ); // soft white light
