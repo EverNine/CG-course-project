@@ -8,9 +8,11 @@ renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
 var mouseState = false;
+var mouseMoved = false;
 var moveStep = 0.1;
-var rotateStep = 0.005;
+var rotateStep = 1;
 var mousePosition;
+var selectedObject = null;
 
 var texture = THREE.ImageUtils.loadTexture( "textures/eye.jpg" );
 var geometry = new THREE.SphereGeometry( 1, 32, 32 );
@@ -79,8 +81,8 @@ document.onkeydown=function(event){
     break;
     case 80: //p
       var img = convertCanvasToImage(document.getElementsByTagName("canvas")[0]);
-      window.open(img.src);
-      break;
+    window.open(img.src);
+    break;
     case 83: //s
       camera.moveEye(0, 0, -moveStep);
     break;
@@ -92,15 +94,19 @@ document.onkeydown=function(event){
   }
 }; 
 
-function mouseCoords(ev) 
+function mouseCoords(event)
 { 
-  if(ev.pageX || ev.pageY){ 
-    return {x:ev.pageX, y:ev.pageY}; 
-  } 
-  return { 
-    x:ev.clientX + document.body.scrollLeft - document.body.clientLeft, 
-    y:ev.clientY + document.body.scrollTop - document.body.clientTop 
-  }; 
+  var mouse = {x: 0, y: 0};
+  mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;	
+  return mouse;
+  //if(ev.pageX || ev.pageY){ 
+  //return {x:ev.pageX, y:ev.pageY}; 
+  //} 
+  //return { 
+  //x:ev.clientX + document.body.scrollLeft - document.body.clientLeft, 
+  //y:ev.clientY + document.body.scrollTop - document.body.clientTop 
+  //}; 
 };
 
 document.onmousedown=function(event){
@@ -109,13 +115,37 @@ document.onmousedown=function(event){
     return;
   mouseState = true;
   mousePosition = mouseCoords(event); 
+  mouseMoved = false;
 };
 
 document.onmouseup=function(event){
   var e = event || window.event || arguments.callee.caller.arguments[0];
   if(!e)
     return;
+  var mousePos = mouseCoords(event);
+  var mouse = new THREE.Vector2(mousePos.x, mousePos.y);
   mouseState = false;
+  if(!mouseMoved){
+    if(selectedObject != null){
+      selectedObject.material.opacity = 1;
+      selectedObject.material.transparent = false;
+      selectedObject = null;
+    }
+    var raycaster = new THREE.Raycaster();
+
+    // update the picking ray with the camera and mouse position	
+    raycaster.setFromCamera( mouse, camera );	
+
+    // calculate objects intersecting the picking ray
+    var intersects = raycaster.intersectObjects( scene.children );
+
+    if(intersects.length > 0){
+      //intersects[ 0 ].object.material.color.set( 0xFFFFFF );
+      intersects[ 0 ].object.material.opacity = 0.5;
+      intersects[ 0 ].object.material.transparent = true;
+      selectedObject = intersects[0].object;
+    }
+  }
 };
 
 document.onmousemove = function(ev) 
@@ -124,13 +154,14 @@ document.onmousemove = function(ev)
   var mousePos = mouseCoords(ev); 
   if(!mouseState)
     return;
-  camera.rotateEye((mousePos.x - mousePosition.x)*rotateStep, (mousePosition.y - mousePos.y)*rotateStep);
+  camera.rotateEye((mousePos.x - mousePosition.x)*rotateStep, (mousePos.y - mousePosition.y)*rotateStep);
   mousePosition = mousePos;
+  mouseMoved = true;
 }; 
 
 // Converts canvas to an image
 function convertCanvasToImage(canvas) {
-	var image = new Image();
-	image.src = canvas.toDataURL("image/png");
-	return image;
+  var image = new Image();
+  image.src = canvas.toDataURL("image/png");
+  return image;
 }
