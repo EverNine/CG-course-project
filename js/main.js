@@ -2,6 +2,8 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 var gui = new dat.GUI();
 var dLight;
+var aLight;
+var sObject;
 
 var renderer = new THREE.WebGLRenderer({
   preserveDrawingBuffer   : true  
@@ -21,8 +23,8 @@ var geometry = new THREE.SphereGeometry( 1, 32, 32 );
 var material = new THREE.MeshPhongMaterial( { color: 0x00ff00, map: texture } );
 var cube = new THREE.Mesh( geometry, material );
 scene.add( cube );
-var light = new THREE.AmbientLight( 0x404040 ); // soft white light
-scene.add( light );
+var ambientLight = new THREE.AmbientLight( 0x404040 ); // soft white light
+scene.add( ambientLight );
 var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
 directionalLight.position.set( 0, 0, 5 );
 scene.add( directionalLight );
@@ -178,6 +180,7 @@ document.onmouseup=function(event){
       intersects[ 0 ].object.material.opacity = 0.5;
       intersects[ 0 ].object.material.transparent = true;
       selectedObject = intersects[0].object;
+      updateGui();
     }
   }
 };
@@ -200,12 +203,47 @@ function convertCanvasToImage(canvas) {
   return image;
 }
 
+var scaleFolder;
+var rotationFolder;
 function initGui(){
+  aLight = gui.addFolder('Ambient Light');
+  aLight.add(ambientLight, 'visible');
+  aLight.addColor(ambientLight, 'color');
   dLight = gui.addFolder('Directional Light');
-  dLight.add(directionalLight.position, "x");
-  dLight.add(directionalLight.position, "y");
-  dLight.add(directionalLight.position, "z");
+  dLight.add(directionalLight, 'visible');
+  dLight.add(directionalLight.position, "x", -100, 100);
+  dLight.add(directionalLight.position, "y", -100, 100);
+  dLight.add(directionalLight.position, "z", -100, 100);
   dLight.addColor(directionalLight, "color");
+  sObject = gui.addFolder('Selected Object');
+  scaleFolder = sObject.addFolder("Scale");
+  rotationFolder = sObject.addFolder("Rotation");
+}
+
+var scaleX;
+var scaleY;
+var scaleZ;
+var rotationX;
+var rotationY;
+var rotationZ;
+function updateGui(){
+  if(selectedObject == null)
+    return;
+  if(scaleX){
+    scaleFolder.remove(scaleX);
+    scaleFolder.remove(scaleY);
+    scaleFolder.remove(scaleZ);
+    rotationFolder.remove(rotationX);
+    rotationFolder.remove(rotationY);
+    rotationFolder.remove(rotationZ);
+  }
+
+  scaleX = scaleFolder.add(selectedObject.scale, "x", 0, 10);
+  scaleY = scaleFolder.add(selectedObject.scale, "y", 0, 10);
+  scaleZ = scaleFolder.add(selectedObject.scale, "z", 0, 10);
+  rotationX = rotationFolder.add(selectedObject.rotation, "x", 0, 180);
+  rotationY = rotationFolder.add(selectedObject.rotation, "y", 0, 180);
+  rotationZ = rotationFolder.add(selectedObject.rotation, "z", 0, 180);
 }
 
 initGui();
