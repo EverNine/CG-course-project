@@ -9,10 +9,15 @@ var mouseState = false;
 var moveStep = 0.1;
 var rotateStep = 0.005;
 var mousePosition;
-var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+var geometry = new THREE.SphereGeometry( 1, 32, 32 );
+var material = new THREE.MeshPhongMaterial( { color: 0x00ff00 } );
 var cube = new THREE.Mesh( geometry, material );
 scene.add( cube );
+var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+scene.add( light );
+var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+directionalLight.position.set( 0, 0, 5 );
+scene.add( directionalLight );
 
 camera.eye = new THREE.Vector3(0,1,0);
 camera.moveEye = function(x, y, z){
@@ -54,6 +59,7 @@ function render() {
   //cube.rotation.y += 0.1;
   renderer.render( scene, camera );
 }
+
 render();
 
 document.onkeydown=function(event){
@@ -93,7 +99,7 @@ function mouseCoords(ev)
     x:ev.clientX + document.body.scrollLeft - document.body.clientLeft, 
     y:ev.clientY + document.body.scrollTop - document.body.clientTop 
   }; 
-} 
+};
 
 document.onmousedown=function(event){
   var e = event || window.event || arguments.callee.caller.arguments[0];
@@ -101,14 +107,14 @@ document.onmousedown=function(event){
     return;
   mouseState = true;
   mousePosition = mouseCoords(event); 
-}
+};
 
 document.onmouseup=function(event){
   var e = event || window.event || arguments.callee.caller.arguments[0];
   if(!e)
     return;
   mouseState = false;
-}
+};
 
 document.onmousemove = function(ev) 
 { 
@@ -118,4 +124,11 @@ document.onmousemove = function(ev)
     return;
   camera.rotateEye((mousePos.x - mousePosition.x)*rotateStep, (mousePosition.y - mousePos.y)*rotateStep);
   mousePosition = mousePos;
-} 
+}; 
+
+// Converts canvas to an image
+function convertCanvasToImage(canvas) {
+	var image = new Image();
+	image.src = canvas.toDataURL("image/png");
+	return image;
+}
