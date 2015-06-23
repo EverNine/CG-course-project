@@ -1,5 +1,7 @@
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+var gui = new dat.GUI();
+var dLight;
 
 var renderer = new THREE.WebGLRenderer({
   preserveDrawingBuffer   : true  
@@ -26,6 +28,7 @@ directionalLight.position.set( 0, 0, 5 );
 scene.add( directionalLight );
 
 camera.eye = new THREE.Vector3(0,1,0);
+
 camera.moveEye = function(x, y, z){
   var vector = this.eye.clone().sub(this.position);
   vector.normalize();
@@ -59,6 +62,19 @@ camera.position.y = 5;
 camera.up = new THREE.Vector3(1,0,1);
 camera.lookAt(new THREE.Vector3( 0, 1, 0 ));
 
+function moveSelectedObject(x, y, z){
+  if (selectedObject == null)
+    return;
+  var vector = camera.eye.clone().sub(camera.position);
+  vector.normalize();
+  var zVector = vector.clone().multiplyScalar(z);
+  selectedObject.position.add(zVector);
+  var xVector = vector.clone().cross(camera.up).multiplyScalar(x);
+  selectedObject.position.add(xVector);
+  var yVector = camera.up.clone().multiplyScalar(y);
+  selectedObject.position.add(yVector);
+};
+
 function render() {
   requestAnimationFrame( render );
   //cube.rotation.x += 0.1;
@@ -73,6 +89,18 @@ document.onkeydown=function(event){
   if(!e)
     return;
   switch (e.keyCode) {
+    case 37: //left
+      moveSelectedObject(-moveStep, 0, 0);
+    break;
+    case 38: //up
+      moveSelectedObject(0, moveStep, 0);
+    break;
+    case 39: //right
+      moveSelectedObject(moveStep, 0, 0);
+    break;
+    case 40: //down
+      moveSelectedObject(0, -moveStep, 0);
+    break;
     case 65: //a
       camera.moveEye(-moveStep, 0, 0);
     break;
@@ -113,6 +141,9 @@ document.onmousedown=function(event){
   var e = event || window.event || arguments.callee.caller.arguments[0];
   if(!e)
     return;
+  var obj=document.elementFromPoint(event.clientX,event.clientY);
+  if(obj.tagName != "CANVAS")
+    return;
   mouseState = true;
   mousePosition = mouseCoords(event); 
   mouseMoved = false;
@@ -121,6 +152,9 @@ document.onmousedown=function(event){
 document.onmouseup=function(event){
   var e = event || window.event || arguments.callee.caller.arguments[0];
   if(!e)
+    return;
+  var obj=document.elementFromPoint(event.clientX,event.clientY);
+  if(obj.tagName != "CANVAS")
     return;
   var mousePos = mouseCoords(event);
   var mouse = new THREE.Vector2(mousePos.x, mousePos.y);
@@ -165,3 +199,13 @@ function convertCanvasToImage(canvas) {
   image.src = canvas.toDataURL("image/png");
   return image;
 }
+
+function initGui(){
+  dLight = gui.addFolder('Directional Light');
+  dLight.add(directionalLight.position, "x");
+  dLight.add(directionalLight.position, "y");
+  dLight.add(directionalLight.position, "z");
+  dLight.addColor(directionalLight, "color");
+}
+
+initGui();
