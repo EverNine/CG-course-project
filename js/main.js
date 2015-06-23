@@ -1,7 +1,9 @@
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-var renderer = new THREE.WebGLRenderer();
+var renderer = new THREE.WebGLRenderer({
+  preserveDrawingBuffer   : true  
+});
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 
@@ -67,18 +69,16 @@ document.onkeydown=function(event){
   if(!e)
     return;
   switch (e.keyCode) {
-    case 38:
-      camera.rotateEye(0, 0.1);
-    break;
-    case 40:
-      camera.rotateEye(0, -0.1);
-    break;
     case 65: //a
       camera.moveEye(-moveStep, 0, 0);
     break;
     case 68: //d
       camera.moveEye(moveStep, 0, 0);
     break;
+    case 80: //p
+      var img = convertCanvasToImage(document.getElementsByTagName("canvas")[0]);
+      window.open(img.src);
+      break;
     case 83: //s
       camera.moveEye(0, 0, -moveStep);
     break;
