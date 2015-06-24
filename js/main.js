@@ -6,9 +6,11 @@ var aLight;
 var sObject;
 
 var renderer = new THREE.WebGLRenderer({
-  preserveDrawingBuffer   : true  
+  preserveDrawingBuffer   : true
 });
 renderer.setSize( window.innerWidth, window.innerHeight );
+renderer.setClearColor(0x000000, 1);
+renderer.shadowMapEnabled = true;
 document.body.appendChild( renderer.domElement );
 
 var mouseState = false;
@@ -18,16 +20,30 @@ var rotateStep = 1;
 var mousePosition;
 var selectedObject = null;
 
-var texture = THREE.ImageUtils.loadTexture( "textures/eye.jpg" );
-var geometry = new THREE.SphereGeometry( 1, 32, 32 );
-var material = new THREE.MeshPhongMaterial( { color: 0x00ff00, map: texture } );
-var cube = new THREE.Mesh( geometry, material );
-scene.add( cube );
 var ambientLight = new THREE.AmbientLight( 0x404040 ); // soft white light
 scene.add( ambientLight );
 var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
 directionalLight.position.set( 0, 0, 5 );
+directionalLight.castShadow = true;
+directionalLight.shadowCameraVisible = true;
 scene.add( directionalLight );
+
+function initScene(){
+  var texture = THREE.ImageUtils.loadTexture( "textures/eye.jpg" );
+  var geometry = new THREE.SphereGeometry( 1, 32, 32 );
+  var material = new THREE.MeshPhongMaterial( { color: 0xffffff, map: texture } );
+  var object = new THREE.Mesh( geometry, material );
+  object.castShadow = object.receiveShadow = true;
+  scene.add( object );
+
+  geometry = new THREE.CubeGeometry(50,80,10);
+  material = new THREE.MeshPhongMaterial( { color: 0xffffff } );
+  object = new THREE.Mesh( geometry, material ); 
+  object.position.z = -10;
+  object.castShadow = object.receiveShadow = true;
+  scene.add(object);
+
+};
 
 camera.eye = new THREE.Vector3(0,1,0);
 
@@ -50,18 +66,18 @@ camera.rotateEye = function(x, y){
   var vector = this.eye.clone().sub(this.position);
   vector.normalize();
   var xVector = vector.clone().cross(this.up);
-  this.eye.add(xVector.clone().multiplyScalar(x));
   this.eye.add(this.up.clone().multiplyScalar(y));
+  this.eye.add(xVector.clone().multiplyScalar(x));
   vector = this.eye.clone().sub(this.position);
   vector.normalize();
   this.eye.addVectors(this.position, vector);
-  this.up.crossVectors(xVector, vector).normalize();
+  //this.up.crossVectors(xVector, vector).normalize();
   this.lookAt(this.eye);
 };
 
 camera.position.y = 5;
 
-camera.up = new THREE.Vector3(1,0,1);
+camera.up = new THREE.Vector3(0,0,1);
 camera.lookAt(new THREE.Vector3( 0, 1, 0 ));
 
 function moveSelectedObject(x, y, z){
@@ -156,11 +172,11 @@ document.onmouseup=function(event){
   if(!e)
     return;
   var obj=document.elementFromPoint(event.clientX,event.clientY);
+  mouseState = false;
   if(obj.tagName != "CANVAS")
     return;
   var mousePos = mouseCoords(event);
   var mouse = new THREE.Vector2(mousePos.x, mousePos.y);
-  mouseState = false;
   if(!mouseMoved){
     if(selectedObject != null){
       selectedObject.material.opacity = 1;
@@ -203,8 +219,10 @@ function convertCanvasToImage(canvas) {
   return image;
 }
 
+var positionFolder;
 var scaleFolder;
 var rotationFolder;
+
 function initGui(){
   aLight = gui.addFolder('Ambient Light');
   aLight.add(ambientLight, 'visible');
@@ -217,10 +235,14 @@ function initGui(){
   dLight.add(directionalLight.position, "z", -100, 100);
   dLight.addColor(directionalLight, "color");
   sObject = gui.addFolder('Selected Object');
+  positionFolder = sObject.addFolder("Position");
   scaleFolder = sObject.addFolder("Scale");
   rotationFolder = sObject.addFolder("Rotation");
 }
 
+var positionX;
+var positionY;
+var positionZ;
 var scaleX;
 var scaleY;
 var scaleZ;
@@ -231,6 +253,9 @@ function updateGui(){
   if(selectedObject == null)
     return;
   if(scaleX){
+    positionFolder.remove(positionX);
+    positionFolder.remove(positionY);
+    positionFolder.remove(positionZ);
     scaleFolder.remove(scaleX);
     scaleFolder.remove(scaleY);
     scaleFolder.remove(scaleZ);
@@ -239,6 +264,9 @@ function updateGui(){
     rotationFolder.remove(rotationZ);
   }
 
+  positionX = positionFolder.add(selectedObject.position, "x");
+  positionY = positionFolder.add(selectedObject.position, "y");
+  positionZ = positionFolder.add(selectedObject.position, "z");
   scaleX = scaleFolder.add(selectedObject.scale, "x", 0, 10);
   scaleY = scaleFolder.add(selectedObject.scale, "y", 0, 10);
   scaleZ = scaleFolder.add(selectedObject.scale, "z", 0, 10);
@@ -247,4 +275,5 @@ function updateGui(){
   rotationZ = rotationFolder.add(selectedObject.rotation, "z", 0, 180);
 }
 
+initScene();
 initGui();
