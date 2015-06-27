@@ -402,13 +402,13 @@ function MyObjLoader() {
 
             } else if ( /^g /.test( line ) ) {
                 // 组
-                meshN( line.substring( 2 ).trim(), undefined );
+                //meshN( line.substring( 2 ).trim(), undefined );
             }
         }
 
         // 使最后一组生效
-        meshN( undefined, undefined );
-        return group;
+        //meshN( undefined, undefined );
+        return geometry;
 
     };
 
