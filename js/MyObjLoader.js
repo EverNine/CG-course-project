@@ -110,7 +110,7 @@ function MyObjLoader() {
             if ( geometry.vertices.length > 0 ) {
 
                 geometry.mergeVertices();
-                geometry.computeCentroids();
+                //geometry.computeCentroids();
                 geometry.computeFaceNormals();
                 geometry.computeBoundingSphere();
 
