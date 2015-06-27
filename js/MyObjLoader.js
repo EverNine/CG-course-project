@@ -4,21 +4,8 @@
 
 //使用示例
 /*
- <script src=“three.min.js"></script>
- <script src="MyObjLoader.js"></script>
- <script>
- //载入一个图片纹理
- var texture = new THREE.Texture();
- var loader = new THREE.ImageLoader();
- //绑定监听，载入图片完成后回调函数
- loader.addEventListener( 'load', function ( event ) {
+ var texture = THREE.ImageUtils.loadTexture( "textures/tank.jpg" );
 
- texture.image = event.content;
- texture.needsUpdate = true;
-
- } );
- //相对路径载入图片
- loader.load( '../textures/tank.jpg' );
 
  // 载入一个物体
  var loader = new MyObjLoader();
@@ -36,7 +23,6 @@
  });
  //相对路径载入obj
  loader.load( '../obj/tank.obj' );
- </script>
  */
 
 function MyObjLoader() {
