@@ -40,8 +40,12 @@ function initScene() {
   ambient = new THREE.AmbientLight( 0x404040 );
   scene.add( ambient );
 
+  var light = new THREE.PointLight( 0xffffff, 1, 100 );
+  light.position.set( 0, 0, 7 );
+  scene.add( light );
+
   spotLight = new THREE.SpotLight( 0xffffff );
-  spotLight.position.set( 10, 10, 5 );
+  spotLight.position.set( 0, 8, 0 );
   spotLight.castShadow = true;
   spotLight.shadowCameraNear = 8;
   spotLight.shadowCameraFar = 30;
@@ -53,7 +57,7 @@ function initScene() {
   scene.add( spotLight );
 
   dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
-  dirLight.position.set( 0, 10, 0 );
+  dirLight.position.set( 0, 20, 0 );
   dirLight.castShadow = true;
   dirLight.shadowCameraNear = 0.01;
   dirLight.shadowCameraFar = 10;
@@ -68,24 +72,8 @@ function initScene() {
   dirLight.name = 'Dir. Light';
   scene.add( dirLight );
 
-  // Geometry
-  var geometry = new THREE.TorusKnotGeometry( 25, 8, 75, 20 );
+  var geometry = new THREE.BoxGeometry( 3, 3, 3 );
   var material = new THREE.MeshPhongMaterial( {
-    color: 0xff0000,
-    shininess: 150,
-    specular: 0x222222,
-    shading: THREE.SmoothShading,
-  } );
-
-  torusKnot = new THREE.Mesh( geometry, material );
-  torusKnot.scale.multiplyScalar( 1 / 18 );
-  torusKnot.position.y = 3;
-  torusKnot.castShadow = true;
-  torusKnot.receiveShadow = true;
-  scene.add( torusKnot );
-
-  geometry = new THREE.BoxGeometry( 3, 3, 3 );
-  material = new THREE.MeshPhongMaterial( {
     color: 0xff0000,
     shininess: 150,
     specular: 0x222222,
@@ -112,15 +100,93 @@ function initScene() {
   scene.add( ground );
 
   var obj;
-  geometry = new THREE.BoxGeometry( 3, 3, 3 );
+  geometry = new THREE.BoxGeometry( 1, 10, 50 );
   material = new THREE.MeshPhongMaterial( {
-    color: 0xff0000,
+    color: 0xffffff,
     shininess: 150,
     specular: 0x222222,
     shading: THREE.SmoothShading,
   } );
   obj = new THREE.Mesh( geometry, material );
-  obj.position.set( 8, 3, 8 );
+  obj.position.set( -17, 5, -6 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.BoxGeometry( 1, 10, 50 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 16, 5, -6 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.BoxGeometry( 32, 10, 1 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( -0.5, 5, 18.5 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.BoxGeometry( 13, 10, 1 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( -10, 5, -31 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.BoxGeometry( 13, 10, 1 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 10, 5, -31 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.BoxGeometry( 7, 1, 1 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 0, 9.5, -31 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.BoxGeometry( 32, 1, 50 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( -0.5, 9.5, -6 );
   obj.castShadow = true;
   obj.receiveShadow = true;
   scene.add( obj );
@@ -140,6 +206,7 @@ function initScene() {
       }
     } );
     object.scale.multiplyScalar(0.1);
+    object.position.y = 1;
     scene.add( object );
   });
   //相对路径载入obj
