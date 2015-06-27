@@ -11,7 +11,9 @@
  var loader = new MyObjLoader();
  //绑定监听，载入obj完成后回调函数
  loader.addEventListener( 'load', function ( event ) {
- var object = event.content;
+ var tankMaterial = new THREE.MeshLambertMaterial();
+ var tankGeo=event.content;
+ tank = new THREE.Mesh(tankGeo,tankMaterial);
  //给物体加上纹理
  object.traverse( function ( child ) {
  if ( child instanceof THREE.Mesh ) {
@@ -22,7 +24,7 @@
  scene.add( object );
  });
  //相对路径载入obj
- loader.load( '../obj/tank.obj' );
+ loader.load( 'obj/tank.obj' );
  */
 
 function MyObjLoader() {
@@ -402,13 +404,13 @@ function MyObjLoader() {
 
             } else if ( /^g /.test( line ) ) {
                 // 组
-                meshN( line.substring( 2 ).trim(), undefined );
+               // meshN( line.substring( 2 ).trim(), undefined );
             }
         }
 
         // 使最后一组生效
-        meshN( undefined, undefined );
-        return group;
+        //meshN( undefined, undefined );
+        return geometry;
 
     };
 
