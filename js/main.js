@@ -198,7 +198,9 @@ function initScene() {
   var loader = new MyObjLoader();
   //绑定监听，载入obj完成后回调函数
   loader.addEventListener( 'load', function ( event ) {
-    var object = event.content;
+    var tankMaterial = new THREE.MeshLambertMaterial();
+    var tankGeo=event.content;
+    var object = new THREE.Mesh(tankGeo,tankMaterial);
     //给物体加上纹理
     object.traverse( function ( child ) {
       if ( child instanceof THREE.Mesh ) {
