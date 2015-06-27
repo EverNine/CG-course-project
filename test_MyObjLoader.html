@@ -64,13 +64,13 @@
             var tankGeo=event.content;
             tank = new THREE.Mesh(tankGeo,tankMaterial);
             //给物体加上纹理
-            object.traverse( function ( child ) {
+            tank.traverse( function ( child ) {
                 if ( child instanceof THREE.Mesh ) {
                     child.material.map = texture;
                 }
             } );
-            object.position.y = -10;
-            scene.add( object );
+            tank.position.y = -10;
+            scene.add( tank );
         });
         //相对路径载入obj
         loader.load( 'obj/tank.obj' );
