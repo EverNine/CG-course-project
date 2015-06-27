@@ -1,49 +1,190 @@
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-var gui = new dat.GUI();
-var dLight;
-var aLight;
-var sObject;
-
-var renderer = new THREE.WebGLRenderer({
-  preserveDrawingBuffer   : true
-});
-renderer.setSize( window.innerWidth, window.innerHeight );
-renderer.setClearColor(0x000000, 1);
-renderer.shadowMapEnabled = true;
-document.body.appendChild( renderer.domElement );
-
+var camera, scene, renderer, clock, stats;
+var dirLight, spotLight, ambient, hemiLight;
+var torusKnot, cube;
 var mouseState = false;
 var mouseMoved = false;
-var moveStep = 0.1;
+var moveStep = 1;
 var rotateStep = 1;
 var mousePosition;
 var selectedObject = null;
+var gui = new dat.GUI();
+var dLight, aLight, sObject;
+var positionX, positionY, positionZ;
+var scaleX, scaleY, scaleZ;
+var rotationX, rotationY, rotationZ;
+var positionFolder, scaleFolder, rotationFolder;
+var sky, sunSphere;
 
-var ambientLight = new THREE.AmbientLight( 0x404040 ); // soft white light
-scene.add( ambientLight );
-var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-directionalLight.position.set( 0, 0, 5 );
-directionalLight.castShadow = true;
-directionalLight.shadowCameraVisible = true;
-scene.add( directionalLight );
+init();
+animate();
+initGui();
 
-function initScene(){
-  var texture = THREE.ImageUtils.loadTexture( "textures/eye.jpg" );
-  var geometry = new THREE.SphereGeometry( 1, 32, 32 );
-  var material = new THREE.MeshPhongMaterial( { color: 0xffffff, map: texture } );
-  var object = new THREE.Mesh( geometry, material );
-  object.castShadow = object.receiveShadow = true;
-  scene.add( object );
+function init() {
 
-  geometry = new THREE.CubeGeometry(50,80,10);
-  material = new THREE.MeshPhongMaterial( { color: 0xffffff } );
-  object = new THREE.Mesh( geometry, material ); 
-  object.position.z = -10;
-  object.castShadow = object.receiveShadow = true;
-  scene.add(object);
+  initScene();
+  initMisc();
 
-};
+  document.body.appendChild( renderer.domElement );
+  window.addEventListener( 'resize', onWindowResize, false );
+
+}
+
+function initScene() {
+
+  camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 0.01, 1000 );
+  camera.position.set( 0, 15, 35 );
+
+  scene = new THREE.Scene();
+
+  // Lights
+  ambient = new THREE.AmbientLight( 0x404040 );
+  scene.add( ambient );
+
+  spotLight = new THREE.SpotLight( 0xffffff );
+  spotLight.position.set( 10, 10, 5 );
+  spotLight.castShadow = true;
+  spotLight.shadowCameraNear = 8;
+  spotLight.shadowCameraFar = 30;
+  spotLight.shadowDarkness = 0.5;
+  spotLight.shadowCameraVisible = true;
+  spotLight.shadowMapWidth = 1024;
+  spotLight.shadowMapHeight = 1024;
+  spotLight.name = 'Spot Light';
+  scene.add( spotLight );
+
+  dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
+  dirLight.position.set( 0, 10, 0 );
+  dirLight.castShadow = true;
+  dirLight.shadowCameraNear = 0.01;
+  dirLight.shadowCameraFar = 10;
+  dirLight.shadowCameraRight = 15;
+  dirLight.shadowCameraLeft = -15;
+  dirLight.shadowCameraTop	= 15;
+  dirLight.shadowCameraBottom = -15;
+  dirLight.shadowDarkness = 0.5;
+  dirLight.shadowCameraVisible = true;
+  dirLight.shadowMapWidth = 1024;
+  dirLight.shadowMapHeight = 1024;
+  dirLight.name = 'Dir. Light';
+  scene.add( dirLight );
+
+  // Geometry
+  var geometry = new THREE.TorusKnotGeometry( 25, 8, 75, 20 );
+  var material = new THREE.MeshPhongMaterial( {
+    color: 0xff0000,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+
+  torusKnot = new THREE.Mesh( geometry, material );
+  torusKnot.scale.multiplyScalar( 1 / 18 );
+  torusKnot.position.y = 3;
+  torusKnot.castShadow = true;
+  torusKnot.receiveShadow = true;
+  scene.add( torusKnot );
+
+  geometry = new THREE.BoxGeometry( 3, 3, 3 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0xff0000,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  cube = new THREE.Mesh( geometry, material );
+  cube.position.set( 8, 3, 8 );
+  cube.castShadow = true;
+  cube.receiveShadow = true;
+  scene.add( cube );
+
+  var geometry = new THREE.BoxGeometry( 1000, 0.15, 1000 );
+  var material = new THREE.MeshPhongMaterial( {
+    color: 0xa0adaf,
+    shininess: 150,
+    specular: 0xffffff,
+    shading: THREE.SmoothShading
+  } );
+
+  var ground = new THREE.Mesh( geometry, material );
+  ground.scale.multiplyScalar( 3 );
+  ground.castShadow = false;
+  ground.receiveShadow = true;
+  scene.add( ground );
+
+  var obj;
+  geometry = new THREE.BoxGeometry( 3, 3, 3 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0xff0000,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 8, 3, 8 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  //texture
+  var texture = THREE.ImageUtils.loadTexture( "textures/tank.jpg" );
+
+  // 载入一个物体
+  var loader = new MyObjLoader();
+  //绑定监听，载入obj完成后回调函数
+  loader.addEventListener( 'load', function ( event ) {
+    var object = event.content;
+    //给物体加上纹理
+    object.traverse( function ( child ) {
+      if ( child instanceof THREE.Mesh ) {
+        child.material.map = texture;
+      }
+    } );
+    object.scale.multiplyScalar(0.1);
+    scene.add( object );
+  });
+  //相对路径载入obj
+  loader.load( 'obj/tank.obj' );
+}
+
+function initMisc() {
+
+  renderer = new THREE.WebGLRenderer({
+    preserveDrawingBuffer   : true
+  });
+  renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setClearColor( 0x000000 );
+  renderer.shadowMapEnabled = true;
+  renderer.shadowMapType = THREE.BasicShadowMap;
+
+}
+
+function onWindowResize() {
+
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize( window.innerWidth, window.innerHeight );
+
+}
+
+function animate() {
+
+  requestAnimationFrame( animate );
+  render();
+
+}
+
+function renderScene() {
+
+  renderer.render( scene, camera );
+
+}
+
+function render() {
+
+  renderScene();
+
+}
 
 camera.eye = new THREE.Vector3(0,1,0);
 
@@ -75,11 +216,6 @@ camera.rotateEye = function(x, y){
   this.lookAt(this.eye);
 };
 
-camera.position.y = 5;
-
-camera.up = new THREE.Vector3(0,0,1);
-camera.lookAt(new THREE.Vector3( 0, 1, 0 ));
-
 function moveSelectedObject(x, y, z){
   if (selectedObject == null)
     return;
@@ -92,15 +228,6 @@ function moveSelectedObject(x, y, z){
   var yVector = camera.up.clone().multiplyScalar(y);
   selectedObject.position.add(yVector);
 };
-
-function render() {
-  requestAnimationFrame( render );
-  //cube.rotation.x += 0.1;
-  //cube.rotation.y += 0.1;
-  renderer.render( scene, camera );
-}
-
-render();
 
 document.onkeydown=function(event){
   var e = event || window.event || arguments.callee.caller.arguments[0];
@@ -219,36 +346,24 @@ function convertCanvasToImage(canvas) {
   return image;
 }
 
-var positionFolder;
-var scaleFolder;
-var rotationFolder;
 
 function initGui(){
   aLight = gui.addFolder('Ambient Light');
-  aLight.add(ambientLight, 'visible');
-  aLight.addColor(ambientLight, 'color');
+  aLight.add(ambient, 'visible');
+  aLight.addColor(ambient, 'color');
   dLight = gui.addFolder('Directional Light');
-  dLight.add(directionalLight, 'visible');
-  dLight.add(directionalLight, 'intensity', 0, 10);
-  dLight.add(directionalLight.position, "x", -100, 100);
-  dLight.add(directionalLight.position, "y", -100, 100);
-  dLight.add(directionalLight.position, "z", -100, 100);
-  dLight.addColor(directionalLight, "color");
+  dLight.add(dirLight, 'visible');
+  dLight.add(dirLight, 'intensity', 0, 10);
+  dLight.add(dirLight.position, "x", -100, 100);
+  dLight.add(dirLight.position, "y", -100, 100);
+  dLight.add(dirLight.position, "z", -100, 100);
+  dLight.addColor(dirLight, "color");
   sObject = gui.addFolder('Selected Object');
   positionFolder = sObject.addFolder("Position");
   scaleFolder = sObject.addFolder("Scale");
   rotationFolder = sObject.addFolder("Rotation");
 }
 
-var positionX;
-var positionY;
-var positionZ;
-var scaleX;
-var scaleY;
-var scaleZ;
-var rotationX;
-var rotationY;
-var rotationZ;
 function updateGui(){
   if(selectedObject == null)
     return;
@@ -274,6 +389,3 @@ function updateGui(){
   rotationY = rotationFolder.add(selectedObject.rotation, "y", 0, 180);
   rotationZ = rotationFolder.add(selectedObject.rotation, "z", 0, 180);
 }
-
-initScene();
-initGui();
