@@ -1,6 +1,5 @@
 var camera, scene, renderer, clock, stats;
 var dirLight, spotLight, ambient, hemiLight;
-var torusKnot, cube;
 var mouseState = false;
 var mouseMoved = false;
 var moveStep = 1;
@@ -72,22 +71,14 @@ function initScene() {
   dirLight.name = 'Dir. Light';
   scene.add( dirLight );
 
-  var geometry = new THREE.BoxGeometry( 3, 3, 3 );
-  var material = new THREE.MeshPhongMaterial( {
-    color: 0xff0000,
-    shininess: 150,
-    specular: 0x222222,
-    shading: THREE.SmoothShading,
-  } );
-  cube = new THREE.Mesh( geometry, material );
-  cube.position.set( 8, 3, 8 );
-  cube.castShadow = true;
-  cube.receiveShadow = true;
-  scene.add( cube );
-
+  var texture = THREE.ImageUtils.loadTexture( "textures/grass.jpg" );
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set( 100, 100 );
   var geometry = new THREE.BoxGeometry( 1000, 0.15, 1000 );
-  var material = new THREE.MeshPhongMaterial( {
+  var material = new THREE.MeshLambertMaterial( {
     color: 0xa0adaf,
+    map: texture,
     shininess: 150,
     specular: 0xffffff,
     shading: THREE.SmoothShading
@@ -100,9 +91,14 @@ function initScene() {
   scene.add( ground );
 
   var obj;
+  texture = THREE.ImageUtils.loadTexture( "textures/wood3.png" );
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set( 2, 1 );
   geometry = new THREE.BoxGeometry( 1, 10, 50 );
-  material = new THREE.MeshPhongMaterial( {
+  material = new THREE.MeshLambertMaterial( {
     color: 0xffffff,
+    map: texture,
     shininess: 150,
     specular: 0x222222,
     shading: THREE.SmoothShading,
@@ -114,8 +110,9 @@ function initScene() {
   scene.add( obj );
 
   geometry = new THREE.BoxGeometry( 1, 10, 50 );
-  material = new THREE.MeshPhongMaterial( {
+  material = new THREE.MeshLambertMaterial( {
     color: 0xffffff,
+    map: texture,
     shininess: 150,
     specular: 0x222222,
     shading: THREE.SmoothShading,
@@ -127,8 +124,9 @@ function initScene() {
   scene.add( obj );
 
   geometry = new THREE.BoxGeometry( 32, 10, 1 );
-  material = new THREE.MeshPhongMaterial( {
+  material = new THREE.MeshLambertMaterial( {
     color: 0xffffff,
+    map: texture,
     shininess: 150,
     specular: 0x222222,
     shading: THREE.SmoothShading,
@@ -140,8 +138,9 @@ function initScene() {
   scene.add( obj );
 
   geometry = new THREE.BoxGeometry( 13, 10, 1 );
-  material = new THREE.MeshPhongMaterial( {
+  material = new THREE.MeshLambertMaterial( {
     color: 0xffffff,
+    map: texture,
     shininess: 150,
     specular: 0x222222,
     shading: THREE.SmoothShading,
@@ -153,8 +152,9 @@ function initScene() {
   scene.add( obj );
 
   geometry = new THREE.BoxGeometry( 13, 10, 1 );
-  material = new THREE.MeshPhongMaterial( {
+  material = new THREE.MeshLambertMaterial( {
     color: 0xffffff,
+    map: texture,
     shininess: 150,
     specular: 0x222222,
     shading: THREE.SmoothShading,
@@ -166,8 +166,9 @@ function initScene() {
   scene.add( obj );
 
   geometry = new THREE.BoxGeometry( 7, 1, 1 );
-  material = new THREE.MeshPhongMaterial( {
+  material = new THREE.MeshLambertMaterial( {
     color: 0xffffff,
+    map: texture,
     shininess: 150,
     specular: 0x222222,
     shading: THREE.SmoothShading,
@@ -178,9 +179,14 @@ function initScene() {
   obj.receiveShadow = true;
   scene.add( obj );
 
+  texture = THREE.ImageUtils.loadTexture( "textures/wood3.png" );
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set( 4, 4 );
   geometry = new THREE.BoxGeometry( 32, 1, 50 );
-  material = new THREE.MeshPhongMaterial( {
+  material = new THREE.MeshLambertMaterial( {
     color: 0xffffff,
+    map: texture,
     shininess: 150,
     specular: 0x222222,
     shading: THREE.SmoothShading,
@@ -192,7 +198,7 @@ function initScene() {
   scene.add( obj );
 
   //texture
-  var texture = THREE.ImageUtils.loadTexture( "textures/tank.jpg" );
+  texture = THREE.ImageUtils.loadTexture( "textures/tank.jpg" );
 
   // 载入一个物体
   var loader = new MyObjLoader();
@@ -207,8 +213,9 @@ function initScene() {
         child.material.map = texture;
       }
     } );
-    object.scale.multiplyScalar(0.1);
+    object.scale.multiplyScalar(0.5);
     object.position.y = 1;
+    object.position.x = 50;
     scene.add( object );
   });
   //相对路径载入obj
