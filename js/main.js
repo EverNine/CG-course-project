@@ -7,9 +7,10 @@ var rotateStep = 1;
 var mousePosition;
 var selectedObject = null;
 var gui = new dat.GUI();
-var dLight, aLight, sObject;
+var dLight, aLight, sObject, sLight, hLight;
 var positionX, positionY, positionZ;
 var scaleX, scaleY, scaleZ;
+var oColor;
 var rotationX, rotationY, rotationZ;
 var positionFolder, scaleFolder, rotationFolder;
 var sky, sunSphere;
@@ -35,25 +36,25 @@ function initScene() {
 
   scene = new THREE.Scene();
 
+  scene.fog = new THREE.Fog( 0xffffff, 1, 5000 );
+  scene.fog.color.setHSL( 0.6, 0, 1 );
+
   // Lights
   ambient = new THREE.AmbientLight( 0x404040 );
   scene.add( ambient );
 
-  var light = new THREE.PointLight( 0xffffff, 1, 100 );
-  light.position.set( 0, 0, 7 );
-  scene.add( light );
-
-  spotLight = new THREE.SpotLight( 0xffffff );
-  spotLight.position.set( 0, 8, 0 );
-  spotLight.castShadow = true;
-  spotLight.shadowCameraNear = 8;
-  spotLight.shadowCameraFar = 30;
-  spotLight.shadowDarkness = 0.5;
-  spotLight.shadowCameraVisible = true;
-  spotLight.shadowMapWidth = 1024;
-  spotLight.shadowMapHeight = 1024;
+  spotLight = new THREE.SpotLight( 0x6e95f8, 5, 20 );
+  spotLight.position.set( 0, 9, 0 );
   spotLight.name = 'Spot Light';
+  spotLight.castShadow = true;
+  spotLight.shadowCameraVisible = true;
   scene.add( spotLight );
+
+  hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
+  hemiLight.color.setHSL( 0.6, 1, 0.6 );
+  hemiLight.groundColor.setHSL( 0.095, 1, 0.75 );
+  hemiLight.position.set( 0, 500, 0 );
+  scene.add( hemiLight );
 
   dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
   dirLight.position.set( 0, 20, 0 );
@@ -90,8 +91,39 @@ function initScene() {
   ground.receiveShadow = true;
   scene.add( ground );
 
+  var vertexShader = document.getElementById( 'vertexShader' ).textContent;
+  var fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
+  var uniforms = {
+    topColor: 	 { type: "c", value: new THREE.Color( 0x0077ff ) },
+    bottomColor: { type: "c", value: new THREE.Color( 0xffffff ) },
+    offset:		 { type: "f", value: 33 },
+    exponent:	 { type: "f", value: 0.6 }
+  }
+  uniforms.topColor.value.copy( hemiLight.color );
+
+  scene.fog.color.copy( uniforms.bottomColor.value );
+
+  var skyGeo = new THREE.SphereGeometry( 500, 32, 15 );
+  var skyMat = new THREE.ShaderMaterial( { vertexShader: vertexShader, fragmentShader: fragmentShader, uniforms: uniforms, side: THREE.BackSide } );
+
+  var sky = new THREE.Mesh( skyGeo, skyMat );
+  scene.add( sky );
+
   var obj;
-  texture = THREE.ImageUtils.loadTexture( "textures/wood3.png" );
+  geometry = new THREE.BoxGeometry( 3, 0.2, 3 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0x6e98f8,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 0, 9, 0 );
+  //obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  texture = THREE.ImageUtils.loadTexture( "textures/wood.png" );
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set( 2, 1 );
@@ -179,7 +211,7 @@ function initScene() {
   obj.receiveShadow = true;
   scene.add( obj );
 
-  texture = THREE.ImageUtils.loadTexture( "textures/wood3.png" );
+  texture = THREE.ImageUtils.loadTexture( "textures/wood.png" );
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set( 4, 4 );
@@ -193,6 +225,84 @@ function initScene() {
   } );
   obj = new THREE.Mesh( geometry, material );
   obj.position.set( -0.5, 9.5, -6 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.BoxGeometry( 2, 2, 2 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 8, 3, -15 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.SphereGeometry( 1, 32, 32 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 8, 3, -10 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.CylinderGeometry( 1, 1, 3, 32 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 8, 3, -5 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.CylinderGeometry( 0, 1, 3, 32 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 8, 3, 0 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.CylinderGeometry( 1, 1, 3, 6 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 8, 3, 5 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+  geometry = new THREE.CylinderGeometry( 0, 1, 3, 6 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 8, 3, 10 );
   obj.castShadow = true;
   obj.receiveShadow = true;
   scene.add( obj );
@@ -427,6 +537,7 @@ function initGui(){
   aLight = gui.addFolder('Ambient Light');
   aLight.add(ambient, 'visible');
   aLight.addColor(ambient, 'color');
+
   dLight = gui.addFolder('Directional Light');
   dLight.add(dirLight, 'visible');
   dLight.add(dirLight, 'intensity', 0, 10);
@@ -434,6 +545,20 @@ function initGui(){
   dLight.add(dirLight.position, "y", -100, 100);
   dLight.add(dirLight.position, "z", -100, 100);
   dLight.addColor(dirLight, "color");
+
+  hLight = gui.addFolder('HemiSpere Light');
+  hLight.add(hemiLight, 'visible');
+  hLight.add(hemiLight, 'intensity', 0, 10);
+  hLight.addColor(hemiLight, "groundColor");
+
+  sLight = gui.addFolder('Spot Light');
+  sLight.add(spotLight, 'visible');
+  sLight.add(spotLight, 'intensity', 0, 10);
+  sLight.add(spotLight.position, "x", -100, 100);
+  sLight.add(spotLight.position, "y", -100, 100);
+  sLight.add(spotLight.position, "z", -100, 100);
+  sLight.addColor(spotLight, "color");
+
   sObject = gui.addFolder('Selected Object');
   positionFolder = sObject.addFolder("Position");
   scaleFolder = sObject.addFolder("Scale");
@@ -453,6 +578,7 @@ function updateGui(){
     rotationFolder.remove(rotationX);
     rotationFolder.remove(rotationY);
     rotationFolder.remove(rotationZ);
+    sObject.remove(oColor);
   }
 
   positionX = positionFolder.add(selectedObject.position, "x");
@@ -464,4 +590,5 @@ function updateGui(){
   rotationX = rotationFolder.add(selectedObject.rotation, "x", 0, 180);
   rotationY = rotationFolder.add(selectedObject.rotation, "y", 0, 180);
   rotationZ = rotationFolder.add(selectedObject.rotation, "z", 0, 180);
+  oColor = sObject.addColor(selectedObject.material, 'color');
 }
