@@ -14,6 +14,7 @@ var oColor;
 var rotationX, rotationY, rotationZ;
 var positionFolder, scaleFolder, rotationFolder;
 var sky, sunSphere;
+var torusKnot;
 
 init();
 animate();
@@ -43,11 +44,16 @@ function initScene() {
   ambient = new THREE.AmbientLight( 0x404040 );
   scene.add( ambient );
 
-  spotLight = new THREE.SpotLight( 0x6e95f8, 5, 20 );
+  spotLight = new THREE.SpotLight( 0xffffff );
   spotLight.position.set( 0, 9, 0 );
-  spotLight.name = 'Spot Light';
   spotLight.castShadow = true;
-  spotLight.shadowCameraVisible = true;
+  spotLight.shadowCameraNear = 3;
+  spotLight.shadowCameraFar = 30;
+  spotLight.shadowDarkness = 0.5;
+  //spotLight.shadowCameraVisible = true;
+  spotLight.shadowMapWidth = 256;
+  spotLight.shadowMapHeight = 256;
+  spotLight.name = 'Spot Light';
   scene.add( spotLight );
 
   hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
@@ -57,16 +63,16 @@ function initScene() {
   scene.add( hemiLight );
 
   dirLight = new THREE.DirectionalLight( 0xffffff, 1 );
-  dirLight.position.set( 0, 20, 0 );
+  dirLight.position.set( 20, 20, 20 );
   dirLight.castShadow = true;
-  dirLight.shadowCameraNear = 0.01;
-  dirLight.shadowCameraFar = 10;
-  dirLight.shadowCameraRight = 15;
-  dirLight.shadowCameraLeft = -15;
-  dirLight.shadowCameraTop	= 15;
-  dirLight.shadowCameraBottom = -15;
+  dirLight.shadowCameraNear = 10;
+  dirLight.shadowCameraFar = 80;
+  dirLight.shadowCameraRight = 50;
+  dirLight.shadowCameraLeft = -50;
+  dirLight.shadowCameraTop	= 50;
+  dirLight.shadowCameraBottom = -50;
   dirLight.shadowDarkness = 0.5;
-  dirLight.shadowCameraVisible = true;
+  //dirLight.shadowCameraVisible = true;
   dirLight.shadowMapWidth = 1024;
   dirLight.shadowMapHeight = 1024;
   dirLight.name = 'Dir. Light';
@@ -211,6 +217,26 @@ function initScene() {
   obj.receiveShadow = true;
   scene.add( obj );
 
+  var video = document.getElementById( 'video' );
+  texture = new THREE.VideoTexture( video );
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
+  texture.format = THREE.RGBFormat;
+  geometry = new THREE.BoxGeometry( 0.1, 3, 4 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    map: texture,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( -16.5, 5, -6 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
+
   texture = THREE.ImageUtils.loadTexture( "textures/wood.png" );
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
@@ -307,6 +333,20 @@ function initScene() {
   obj.receiveShadow = true;
   scene.add( obj );
 
+  geometry = new THREE.TorusKnotGeometry( 10, 3, 100, 16 );
+  material = new THREE.MeshPhongMaterial( {
+    color: 0x000088,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  torusKnot = new THREE.Mesh( geometry, material );
+  torusKnot.castShadow = true;
+  torusKnot.receiveShadow = true;
+  torusKnot.position.set( 0, 3, 0 );
+  torusKnot.scale.multiplyScalar(0.1);
+  scene.add( torusKnot );
+
   //texture
   texture = THREE.ImageUtils.loadTexture( "textures/tank.jpg" );
 
@@ -362,6 +402,9 @@ function animate() {
 
 function renderScene() {
 
+  torusKnot.rotation.x += 0.1;
+  torusKnot.rotation.y += 0.1;
+  torusKnot.rotation.z += 0.1;
   renderer.render( scene, camera );
 
 }
