@@ -333,6 +333,19 @@ function initScene() {
   obj.receiveShadow = true;
   scene.add( obj );
 
+  geometry = new THREE.CylinderGeometry( 0.5, 1, 1.5, 6 );
+  material = new THREE.MeshLambertMaterial( {
+    color: 0xffffff,
+    shininess: 150,
+    specular: 0x222222,
+    shading: THREE.SmoothShading,
+  } );
+  obj = new THREE.Mesh( geometry, material );
+  obj.position.set( 8, 2.2, 15 );
+  obj.castShadow = true;
+  obj.receiveShadow = true;
+  scene.add( obj );
+
   geometry = new THREE.TorusKnotGeometry( 10, 3, 100, 16 );
   material = new THREE.MeshPhongMaterial( {
     color: 0x000088,
