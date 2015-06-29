@@ -496,7 +496,11 @@ document.onkeydown=function(event){
     break;
     case 80: //p
       var img = convertCanvasToImage(document.getElementsByTagName("canvas")[0]);
-    window.open(img.src);
+    var pic = document.getElementsByTagName("img")[0];
+    if (pic != null)
+      document.body.removeChild(pic);
+    document.body.appendChild(img);
+    //window.open(img.src);
     break;
     case 83: //s
       camera.moveEye(0, 0, -moveStep);
