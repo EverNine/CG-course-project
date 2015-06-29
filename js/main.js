@@ -621,7 +621,8 @@ function updateGui(){
     rotationFolder.remove(rotationX);
     rotationFolder.remove(rotationY);
     rotationFolder.remove(rotationZ);
-    sObject.remove(oColor);
+    if(oColor)
+      sObject.remove(oColor);
   }
 
   positionX = positionFolder.add(selectedObject.position, "x");
@@ -633,5 +634,8 @@ function updateGui(){
   rotationX = rotationFolder.add(selectedObject.rotation, "x", 0, 180);
   rotationY = rotationFolder.add(selectedObject.rotation, "y", 0, 180);
   rotationZ = rotationFolder.add(selectedObject.rotation, "z", 0, 180);
-  oColor = sObject.addColor(selectedObject.material, 'color');
+  if (selectedObject.material.color != null)
+    oColor = sObject.addColor(selectedObject.material, 'color');
+  else
+    oColor = null;
 }
